@@ -1,0 +1,27 @@
+{
+    "graph-database": {
+        "user": "username",
+        "password": "password",
+        "repo-name": "USE_CASE_NAME",
+        "repo-url": "http://127.0.0.1:7200/repositories/USE_CASE_NAME",
+        "repo-mgmt-api-url": "http://127.0.0.1:7200/rest/repositories",
+        "repo-config-file": "./graphdb_repo_config.ttl",
+        "repo-recreate": false
+    },
+    "named-graphs": [
+        {
+            "uri": "http://w3id.org/explainability/graph/ontology",
+            "ttl_files": [
+                "./data/SENSE.ttl"
+            ],
+            "reupload": false
+        },
+        {
+            "uri": "http://w3id.org/explainability/graph/USE_CASE_NAME_static",
+            "ttl_files": [
+                "./data/system-data.ttl"
+            ],
+            "reupload": false
+        }
+    ]
+}

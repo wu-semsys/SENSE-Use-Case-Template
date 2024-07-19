@@ -1,0 +1,83 @@
+services:
+
+  #
+  # Infrastructure
+  #
+
+  mosquitto:
+    image: docker.io/eclipse-mosquitto:2.0.18
+    container_name: mosquitto
+    command:
+      - mosquitto
+      - -c
+      - /mosquitto-no-auth.conf
+    ports:
+      - 1883:1883
+
+  #
+  # Knowledgebase
+  #
+
+  knowledgebase:
+    image: registry.ai.wu.ac.at/sense/sense-core/knowledgebase:latest
+    container_name: knowledgebase
+    privileged: true
+    ports:
+      - 7200:7200
+      - 7300:7300
+    volumes:
+      - ./config/knowledgebase.docker.json:/opt/knowledgebase/config.json:ro
+      - ./infrastructure/knowledgebase/data/:/opt/knowledgebase/data/:ro
+      - ./infrastructure/knowledgebase/graphdb_repo_config.ttl:/opt/knowledgebase/graphdb_repo_config.ttl:ro
+      
+  #
+  # Semantic Event Log
+  #
+
+  semantic-event-log-bridge:
+    container_name: semantic-event-log-bridge
+    image: registry.ai.wu.ac.at/sense/sense-core/semantic-event-log-bridge:latest
+    volumes:
+      - ./config/semantic_event_log_bridge.docker.json:/opt/semantic-event-log_bridge/config/semantic_event_log_bridge.docker.json:ro
+  
+  #
+  # Services
+  #
+
+  simple-event-detection:
+    container_name: simple-event-detection
+    image: registry.ai.wu.ac.at/sense/sense-core/simple-event-detection:latest
+    volumes:
+      - ./config/simple_event_detection.docker.json:/opt/monitoring-service/config.json:ro
+  
+  #
+  # Data Ingestion
+  #
+
+  data-ingestion:
+    container_name: data-ingestion
+    image: registry.ai.wu.ac.at/sense/sense-core/data-ingestion:latest
+    volumes:
+      - ./config/data_ingestion.docker.json:/opt/data-ingestion/config.json:ro
+  
+  #
+  # Event to State Causality
+  #
+  
+  event-to-state-causality:
+    container_name: event-to-state-causality
+    image: registry.ai.wu.ac.at/sense/sense-core/event-to-state-causality:latest
+    volumes: 
+      - ./config/event_to_state_causality.docker.json:/opt/event-to-state-causality/config.json:ro
+      
+  #
+  # Explanation Engine
+  #
+  
+  explanation-engine:
+    container_name: explanation-engine
+    image: registry.ai.wu.ac.at/sense/sense-core/explanation-engine:latest
+    volumes: 
+      - ./config/explanation_engine.docker.json:/opt/explanation-engine/config.json:ro
+    ports:
+      - 5001:5001  

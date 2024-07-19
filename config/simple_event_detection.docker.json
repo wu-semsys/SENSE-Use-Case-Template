@@ -1,0 +1,12 @@
+{
+    "mqtt": {
+        "host": "mosquitto",
+        "port": 1883,
+        "clientId": "monitoring-service"
+    },
+    "semantic-model": {
+        "host": "knowledgebase",
+        "port": 7200,
+        "repository": "USE_CASE_NAME"
+    }
+}

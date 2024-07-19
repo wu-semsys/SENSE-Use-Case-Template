@@ -1,0 +1,13 @@
+{
+    "mqtt": {
+        "host": "mosquitto",
+        "port": 1883,
+        "clientId": "event-to-state-causality"
+    },
+    "semantic-model": {
+        "host": "knowledgebase",
+        "port": 7200,
+        "repository": "USE_CASE_NAME",
+		"namedGraph": "http://w3id.org/explainability/graph/USE_CASE_NAME_dynamic"
+    }
+}

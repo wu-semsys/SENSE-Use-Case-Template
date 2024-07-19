@@ -1,0 +1,28 @@
+{
+    "mqtt": {
+        "host": "mosquitto",
+        "port": 1883,
+        "clientId": "data-ingestion"
+    },
+    "semantic-model": {
+        "host": "knowledgebase",
+        "port": 7200,
+        "repository": "USE_CASE_NAME"
+    },
+    "influxdb": {
+        "host": "influxdb",
+        "port": 8086,
+        "protocol": "http",
+        "bucket": "USE_CASE_NAME",
+        "org": "USE_CASE_NAME",
+        "token": "secretadmintoken"
+    },
+    "time": {
+        "mode": "replay",
+        "startAt": "2023-04-01T00:00:00",
+        "stopAt": "2023-04-30T23:59:00",
+        "stopAction": "repeat",
+        "deltaInSeconds": "60",
+        "sleepInSeconds": "60"
+    }
+}

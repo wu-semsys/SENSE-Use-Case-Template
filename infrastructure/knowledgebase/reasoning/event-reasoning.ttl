@@ -1,0 +1,401 @@
+@prefix : <http://example.org/USE_CASE_NAME#> .
+@prefix s: <http://w3id.org/explainability/sense#> .
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <https://www.w3.org/ns/ssn/> .
+
+:DemandEnvelopeNormalAndViolatedShape a sh:NodeShape ;
+    sh:targetClass :Garage ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn: ;
+        sh:construct """
+			CONSTRUCT {
+				?newRuleNormal a s:EventDetection ;
+                    s:detectsEventType :DemandEnvelopeNormal_Event ;
+                    s:hasSTLFormula ?normalFormula ;
+                    s:hasVariable [
+                        s:hasName "Envelope" ;
+                        s:bindsTo ?envelope
+                    ] .
+
+				?newRuleHigh a s:EventDetection ;
+                    s:detectsEventType :DemandEnvelopeViolated_Event ;
+                    s:hasSTLFormula ?highFormula ;
+                    s:hasVariable [
+                        s:hasName "Envelope" ;
+                        s:bindsTo ?envelope
+                    ] .
+
+                ?violation_sensor ssn:implements ?newRuleHigh, ?newRuleNormal .
+			}
+			WHERE {
+                {
+                    SELECT (GROUP_CONCAT(?simpleNameCharger; separator=" + ") as ?chargers)
+                    WHERE {
+                        $this sosa:hosts+ ?charger .
+                        ?charger sosa:hosts [
+                            s:hasSensorType :AP_EVCharger_Sensor
+                        ] .
+                        BIND(STRAFTER(str(?charger), str(:)) AS ?simpleNameCharger)
+                    }
+                    GROUP BY $this
+                }
+                {
+                    SELECT (GROUP_CONCAT(?simpleNameBattery; separator=" + ") as ?batteries)
+                    WHERE {
+                        $this sosa:hosts ?battery .
+                        ?battery sosa:hosts [
+                            s:hasSensorType :AP_Battery_Sensor
+                        ] .
+                        BIND(STRAFTER(str(?battery), str(:)) AS ?simpleNameBattery)
+                    }
+                    GROUP BY $this
+                }
+                {
+                    SELECT (GROUP_CONCAT(?simpleNamePV; separator=" - ") as ?pvs)
+                    WHERE {
+                        $this sosa:hosts ?pv .
+                        ?pv sosa:hosts [
+                            s:hasSensorType :AP_PVSystem_Sensor
+                        ] .
+                        BIND(STRAFTER(str(?pv), str(:)) AS ?simpleNamePV)
+                    }
+                    GROUP BY $this
+                }
+
+                $this sosa:hosts ?envelope, ?violation_sensor .
+                ?envelope s:hasSensorType :OE_Garage_Sensor .
+                ?violation_sensor s:hasSensorType :EnvelopeViolation_Garage_Sensor .
+
+                BIND(IRI(CONCAT(str($this), "_DemandEnvelopeNormal_Event")) AS ?newRuleNormal)
+				BIND(IRI(CONCAT(str($this), "_DemandEnvelopeViolated_Event")) AS ?newRuleHigh)
+                BIND(CONCAT(?chargers, " + ", ?batteries, " - ", ?pvs, " <= Envelope") AS ?normalFormula)
+                BIND(CONCAT(?chargers, " + ", ?batteries, " - ", ?pvs, " > Envelope") AS ?highFormula)
+			}
+        """ ;
+    ] .
+
+# Separating this is a work around until virtual sensors are supported
+:DemandEnvelopeNormalAndViolatedShape_ChargerBindings a sh:NodeShape ;
+    sh:targetClass :Garage ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn: ;
+        sh:construct """
+			CONSTRUCT {
+				?newRuleNormal s:hasVariable [
+                        s:hasName ?simpleName ;
+                        s:bindsTo ?sensor
+                    ] .
+
+				?newRuleHigh s:hasVariable [
+                        s:hasName ?simpleName ;
+                        s:bindsTo ?sensor
+                    ] .
+            }
+			WHERE {
+                $this sosa:hosts+ ?entity .
+                ?entity sosa:hosts ?sensor .
+                ?sensor s:hasSensorType :AP_EVCharger_Sensor .
+
+                BIND(STRAFTER(str(?entity), str(:)) AS ?simpleName)
+                BIND(IRI(CONCAT(str($this), "_DemandEnvelopeNormal_Event")) AS ?newRuleNormal)
+				BIND(IRI(CONCAT(str($this), "_DemandEnvelopeViolated_Event")) AS ?newRuleHigh)
+			}
+        """ ;
+    ] .
+
+:DemandEnvelopeNormalAndViolatedShape_OtherBindings a sh:NodeShape ;
+    sh:targetClass :Garage ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn: ;
+        sh:construct """
+			CONSTRUCT {
+				?newRuleNormal s:hasVariable [
+                        s:hasName ?simpleName ;
+                        s:bindsTo ?sensor
+                    ] .
+
+				?newRuleHigh s:hasVariable [
+                        s:hasName ?simpleName ;
+                        s:bindsTo ?sensor
+                    ] .
+            }
+			WHERE {
+                $this sosa:hosts ?entity .
+                ?entity sosa:hosts ?sensor .
+                ?sensor s:hasSensorType ?sensor_type .
+
+                FILTER( ?sensor_type IN
+                    (:AP_Battery_Sensor, :AP_PVSystem_Sensor)
+                ) .
+
+                BIND(STRAFTER(str(?entity), str(:)) AS ?simpleName)
+                BIND(IRI(CONCAT(str($this), "_DemandEnvelopeNormal_Event")) AS ?newRuleNormal)
+				BIND(IRI(CONCAT(str($this), "_DemandEnvelopeViolated_Event")) AS ?newRuleHigh)
+			}
+        """ ;
+    ] .
+
+:EVOverallNormalAndHighChargingShape a sh:NodeShape ;
+    sh:targetClass :Garage ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn: ;
+        sh:construct """
+			CONSTRUCT {
+				?newRuleNormal a s:EventDetection ;
+                    s:detectsEventType :EVOverallNormalCharging_Event ;
+                    s:hasSTLFormula ?normalFormula ;
+                    s:hasVariable [
+                        s:hasName "Envelope" ;
+                        s:bindsTo ?envelope
+                    ] .
+
+				?newRuleHigh a s:EventDetection ;
+                    s:detectsEventType :EVOverallHighCharging_Event ;
+                    s:hasSTLFormula ?highFormula ;
+                    s:hasVariable [
+                        s:hasName "Envelope" ;
+                        s:bindsTo ?envelope
+                    ] .
+
+                ?all_chargers_sensor ssn:implements ?newRuleHigh, ?newRuleNormal .
+			}
+			WHERE {
+                {
+                    SELECT (GROUP_CONCAT(?simpleNameCharger; separator=" + ") as ?chargers)
+                    WHERE {
+                        $this sosa:hosts+ ?charger .
+                        ?charger sosa:hosts [
+                            s:hasSensorType :AP_EVCharger_Sensor
+                        ] .
+                        BIND(STRAFTER(str(?charger), str(:)) AS ?simpleNameCharger)
+                    }
+                    GROUP BY $this
+                }
+
+                $this sosa:hosts ?envelope, ?all_chargers .
+                ?envelope s:hasSensorType :OE_Garage_Sensor .
+                ?all_chargers sosa:hosts ?all_chargers_sensor .
+                ?all_chargers_sensor s:hasSensorType :AP_AllEVChargers_Sensors .
+
+                BIND(IRI(CONCAT(str($this), "_EVOverallNormalCharging_Event")) AS ?newRuleNormal)
+				BIND(IRI(CONCAT(str($this), "_EVOverallHighCharging_Event")) AS ?newRuleHigh)
+                BIND(CONCAT("(", ?chargers, ") <= Envelope") AS ?normalFormula)
+                BIND(CONCAT("(", ?chargers, ") > Envelope") AS ?highFormula)
+			}
+        """ ;
+    ] .
+
+:EVOverallHighAndNormalChargingShape_ChargerBindings a sh:NodeShape ;
+    sh:targetClass :Garage ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn: ;
+        sh:construct """
+			CONSTRUCT {
+				?newRuleHigh s:hasVariable [
+                        s:hasName ?simpleNameCharger ;
+                        s:bindsTo ?ap_sensor
+                    ] .
+				?newRuleNormal s:hasVariable [
+                        s:hasName ?simpleNameCharger ;
+                        s:bindsTo ?ap_sensor
+                    ] .
+			}
+			WHERE {
+                $this sosa:hosts+ ?charger .
+                ?charger sosa:hosts ?ap_sensor .
+                ?ap_sensor s:hasSensorType :AP_EVCharger_Sensor .
+
+                BIND(STRAFTER(str(?charger), str(:)) AS ?simpleNameCharger)
+				BIND(IRI(CONCAT(str($this), "_EVOverallHighCharging_Event")) AS ?newRuleHigh)
+                BIND(IRI(CONCAT(str($this), "_EVOverallNormalCharging_Event")) AS ?newRuleNormal)
+			}
+        """ ;
+    ] .
+
+:EVIndividualHighChargingShape a sh:NodeShape ;
+    sh:targetClass :EVCharger ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn: ;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :EVIndividualHighCharging_Event ;
+                    s:hasSTLFormula "charger > envelope" ;
+                    s:hasVariable [
+                        s:hasName "charger" ;
+                        s:bindsTo ?ap
+                    ] ;
+                    s:hasVariable [
+                        s:hasName "envelope" ;
+                        s:bindsTo ?envelope
+                    ] .
+                ?ap ssn:implements ?newRule ;
+			}
+			WHERE {
+                ?garage sosa:hosts ?envelope .
+                ?garage sosa:hosts+ $this .
+                $this sosa:hosts ?ap .
+                ?envelope s:hasSensorType :OE_Garage_Sensor .
+                ?ap s:hasSensorType :AP_EVCharger_Sensor .
+				BIND(IRI(CONCAT(str($this), "_EVIndividualHighCharging_Event")) AS ?newRule)
+			}
+        """ ;
+    ] .
+
+:EVIndividualNormalChargingShape a sh:NodeShape ;
+    sh:targetClass :EVCharger ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :EVIndividualNormalCharging_Event ;
+                    s:hasSTLFormula "charger <= envelope" ;
+                    s:hasVariable [
+                        s:hasName "charger" ;
+                        s:bindsTo ?ap
+                    ] ;
+                    s:hasVariable [
+                        s:hasName "envelope" ;
+                        s:bindsTo ?envelope
+                    ] .
+                ?ap ssn:implements ?newRule ;
+			}
+			WHERE {
+                ?garage sosa:hosts ?envelope .
+                ?garage sosa:hosts+ $this .
+                $this sosa:hosts ?ap .
+                ?envelope s:hasSensorType :OE_Garage_Sensor .
+                ?ap s:hasSensorType :AP_EVCharger_Sensor .
+				BIND(IRI(CONCAT(str($this), "_EVIndividualNormalCharging_Event")) AS ?newRule)
+			}
+        """ ;
+    ] .
+
+:BatteryNotUsedShape a sh:NodeShape ;
+    sh:targetClass :Battery ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :BatteryNotUsed_Event ;
+                    s:hasSTLFormula "abs(battery) <= 0.01" ;
+                    s:hasVariable [
+                        s:hasName "battery" ;
+                        s:bindsTo ?ap
+                    ] .
+                ?ap ssn:implements ?newRule ;
+			}
+			WHERE {
+                $this sosa:hosts ?ap .
+                ?ap s:hasSensorType :AP_Battery_Sensor .
+				BIND(IRI(CONCAT(str($this), "_BatteryNotUsed_Event")) AS ?newRule)
+			}
+        """ ;
+    ] .
+
+:BatteryChargingShape a sh:NodeShape ;
+    sh:targetClass :Battery ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :BatteryCharging_Event ;
+                    s:hasSTLFormula "battery < 0.01" ;
+                    s:hasVariable [
+                        s:hasName "battery" ;
+                        s:bindsTo ?ap
+                    ] .
+                ?ap ssn:implements ?newRule ;
+			}
+			WHERE {
+                $this sosa:hosts ?ap .
+                ?ap s:hasSensorType :AP_Battery_Sensor .
+				BIND(IRI(CONCAT(str($this), "_BatteryCharging_Event")) AS ?newRule)
+			}
+        """ ;
+    ] .
+
+:BatteryDischargingShape a sh:NodeShape ;
+    sh:targetClass :Battery ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :BatteryDischarging_Event ;
+                    s:hasSTLFormula "battery > 0.01" ;
+                    s:hasVariable [
+                        s:hasName "battery" ;
+                        s:bindsTo ?ap
+                    ] .
+                ?ap ssn:implements ?newRule ;
+			}
+			WHERE {
+                $this sosa:hosts ?ap .
+                ?ap s:hasSensorType :AP_Battery_Sensor .
+				BIND(IRI(CONCAT(str($this), "_BatteryDischarging_Event")) AS ?newRule)
+			}
+        """ ;
+    ] .
+
+:BatterySocLowShape a sh:NodeShape ;
+    sh:targetClass :Battery ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :BatterySocLow_Event ;
+                    s:hasSTLFormula "battery < 15" ;
+                    s:hasVariable [
+                        s:hasName "battery" ;
+                        s:bindsTo ?soc
+                    ] .
+                ?soc ssn:implements ?newRule ;
+			}
+			WHERE {
+                $this sosa:hosts ?soc .
+                ?soc s:hasSensorType :SOC_Battery_Sensor .
+				BIND(IRI(CONCAT(str($this), "_BatterySocLow_Event")) AS ?newRule)
+			}
+        """ ;
+    ] .
+
+:BatterySocNotLowShape a sh:NodeShape ;
+    sh:targetClass :Battery ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :BatterySocNotLow_Event ;
+                    s:hasSTLFormula "battery >= 15" ;
+                    s:hasVariable [
+                        s:hasName "battery" ;
+                        s:bindsTo ?soc
+                    ] .
+                ?soc ssn:implements ?newRule ;
+			}
+			WHERE {
+                $this sosa:hosts ?soc .
+                ?soc s:hasSensorType :SOC_Battery_Sensor .
+				BIND(IRI(CONCAT(str($this), "_BatterySocNotLow_Event")) AS ?newRule)
+			}
+        """ ;
+    ] .

@@ -1,93 +1,133 @@
 # Use Case Template
 
+We provide this Use Case Template repository as a starting point for creating a new SENSE instance from the [SENSE Core](https://git.ai.wu.ac.at/sense/sense-core). Check out the SENSE Core documentation for information about the general concept and detailed information about the individual modules.
 
+## Table of Conents
+- [SENSE Use Case Instantiation Instructions](#sense-use-case-instantiation-instructions)
+- [1. Fork the SENSE Use Case Template](#1-fork-the-sense-use-case-template)
+- [2. Prepare the Use-Case-Specific Information](#2-prepare-the-use-case-specific-information)
+- [3. Generate system-data.ttl ](#3-generate-system-datattl)
+- [4. Set up a Connection to an Existing InfluxDB Instance](#4-set-up-a-connection-to-an-existing-influxdb-instance)
+- [5. Optional: Build the Docker Images](#5-optional-build-the-docker-images)
+- [6. Run the Application](#6-run-the-application)
+- [7. Request Events and Explanations](#7-request-events-and-explanations)
 
-## Getting started
+## SENSE Use Case Instantiation Instructions
+There are several steps listed below that will create a new use-case-specific repository from this Use Case Template repository and populate the template with use-case-specific information. Note that, on several occasions, it is necessary to define a name for the use case. We use USE_CASE_NAME as a placeholder. 
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### 1. Fork the SENSE Use Case Template
+If your use-case-specific instance of SENSE should be hosted on the same Git server as this Use Case Template repository, utilize the built-in fork functionality to create a fork of this repository.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+If you need to host your use-case-specific instance of SENSE on a different Git server, follow the steps below:
+1. Create an empty repository on your Git server, but do not initialize it with any files
+2. Clone the repository you've just created to your local machine using the following commands:
+```bash
+git clone git@git.auto.tuwien.ac.at:tfruehwirth/USE_CASE_NAME.git
+cd USE_CASE_NAME
 ```
-cd existing_repo
-git remote add origin https://git.ai.wu.ac.at/sense/use-case-template.git
-git branch -M main
-git push -uf origin main
+
+2. Add the Use Case Template repository as remote repository named "upstream":
+```bash
+git remote add upstream git@git.ai.wu.ac.at:sense/use-case-template.git
+```
+3. Fetch the latest changes from the remote repository "upstream" using the command:
+```bash
+git fetch upstream
+```
+4. Merge into your local branch:
+```bash
+git merge remotes/upstream/main
 ```
 
-## Integrate with your tools
+This will result in a repository with the following file structure:
 
-- [ ] [Set up project integrations](https://git.ai.wu.ac.at/sense/use-case-template/-/settings/integrations)
+```bash
+├── README.md (# this README file)
+├── compose.yml # (docker compose file)
+├── config # (configuration files for all modules)
+│   ├── data_ingestion.docker.json
+│   ├── event_to_state_causality.docker.json
+│   ├── explanation_engine.docker.json
+│   ├── knowledgebase.docker.json
+│   ├── semantic_event_log_bridge.docker.json
+│   └── simple_event_detection.docker.json
+├── infrastructure # (additional module-specific configuration and data files)
+│   └── knowledgebase
+│       ├── SystemData.xlsx
+│       ├── data
+│       │   └── SENSE.ttl
+│       ├── graphdb_repo_config.ttl
+│       └── reasoning
+│           └── event-reasoning.ttl
+└── tools
+    └── requirements.txt # python package requirements for XLSXtoTTL.py
+    └── XLSXtoTTL.py # script for converting SystemData.xlsx to system-data.ttl
+```
 
-## Collaborate with your team
+The USE_CASE_NAME placeholder is currently quite havily used. We are working on reducing the number of occurances. We suggest search-and-replace for replacing the USE_CASE_NAME with an expressive name for your use case. For now, it is present in the following files:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```bash
+./config/data_ingestion.docker.json
+./config/event_to_state_causality.docker.json
+./config/simple_event_detection.docker.json
+./config/explanation_engine.docker.json
+./config/semantic_event_log_bridge.docker.json
+./config/knowledgebase.docker.json
+./infrastructure/knowledgebase/graphdb_repo_config.ttl
+./infrastructure/knowledgebase/reasoning/event-reasoning.ttl
+```
 
-## Test and Deploy
+### 2. Prepare the Use-Case-Specific Information
+Follow our [Guide]() (TODO: add link to the guide on the necessary steps for analyzing the data, identifying relevant events, and defining appropriate explanations). During this step, the use-case-specific information will be collected and used to populate the [SystemData.xlsx](./infrastructure/knowledgebase/SystemData.xlsx) file. 
 
-Use the built-in continuous integration in GitLab.
+### 3. Generate system-data.ttl 
+The [SystemData.xlsx](./infrastructure/knowledgebase/SystemData.xlsx) has to be converted to a Turtle (ttl) file, before it can be used by the SENSE system. We provide a script for this purpose.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```bash
+cd tools
 
-***
+# install required python packages
+pip install -r requirements.txt
 
-# Editing this README
+# create system-data.ttl from SystemData.xlsx
+python3 XLSXtoTTL.py "http://example.org/USE_CASE_NAME#" \
+    ../infrastructure/knowledgebase/SystemData.xlsx \
+    ../infrastructure/knowledgebase/data/system-data.ttl \
+    --shacl-path ../infrastructure/knowledgebase/reasoning/event-reasoning.ttl
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### 4. Set up a Connection to an Existing InfluxDB Instance
+The SENSE system needs to connect to an existing InfluxDB database to access data that should be monitored and explained. Additional information on how to configure the data-ingestion module accordingly is provided in the [README file of the data-ingestion module](https://git.ai.wu.ac.at/sense/sense-core/-/blob/main/sense_core/data_ingestion/README.md)
 
-## Suggestions for a good README
+### 5. Optional: Build the Docker Images
+We provide pre-built images via [registry.ai.wu.ac.at](registry.ai.wu.ac.at). However, if you would rather build the images locally, you can use the Dockerfiles/Containerfiles provided in the [SENSE Core](https://git.ai.wu.ac.at/sense/sense-core) repository under the sense_core directory. As an example, the knowledgebase image can be built with:
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+cd sense-core/sense_core
+docker build --tag sense-core/knowledgebase:latest -f knowledgebase.amd64.Containerfile .
+```
 
-## Name
-Choose a self-explaining name for your project.
+### 6. Run the Application
+If you want to use our pre-built images, you need to login into the container registry so that you can access the images. Once logged in, simply spin up your compose tool of choice to get a running system.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+docker login -u <your-email> -p <api-token> registry.ai.wu.ac.at
+docker compose up
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Alternatively, if you want to use the Docker image you built locally in the [previous step](#5-optional-build-the-docker-images), you need to adjust the [compose.yml](compose.yml) file accordingly. E.g., for the knowledgebase module, you need to replace 
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```image: registry.ai.wu.ac.at/sense/sense-core/knowledgebase:latest``` 
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+with ```image: sense-core/knowledgebase:latest```. 
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Then, start the application with:
+```
+docker compose up
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### 7. Request Events and Explanations
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Refer to [https://git.ai.wu.ac.at/sense/sense-core/-/blob/main/sense_core/simple_event_detection/README.md](https://git.ai.wu.ac.at/sense/sense-core/-/blob/main/sense_core/simple_event_detection/README.md) for instructions on how to retrieve a list of **events** from your SENSE system instantiation.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Refer to [https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-engine/README.md](https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-engine/README.md) for instructions on how to retrieve **explanations** for events from your SENSE system instantiation. 

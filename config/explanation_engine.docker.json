@@ -1,0 +1,10 @@
+{
+    "semantic-model": {
+        "host": "knowledgebase",
+        "port": 7200,
+        "repository": "USE_CASE_NAME"
+    },
+	"explanation-engine": {
+		"port": 5001
+	}
+}
