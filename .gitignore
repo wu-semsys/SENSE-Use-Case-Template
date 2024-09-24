@@ -1,0 +1,2 @@
+# Ignore all files that start with ~$ in any directory
+**/~$*
