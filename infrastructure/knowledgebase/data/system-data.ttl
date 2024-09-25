@@ -1,1 +1,28 @@
+@prefix : <http://example.org/exampleusecase#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix s: <http://w3id.org/explainability/sense#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+:ExamplePlatform1 a :ExamplePlatformType1 ;
+    rdfs:label "ExamplePlatform1" .
+
+:ExampleSensorType1 rdfs:subClassOf : .
+
+:ExampleStateType1 a s:StateType ;
+    rdfs:label "ExampleStateType1" ;
+    s:associatedSensorType s:ExampleSensorType1 ;
+    s:hasStartEventType :EventType1 .
+
+:ExampleStateType2 a s:StateType ;
+    rdfs:label "ExampleStateType2" ;
+    s:associatedSensorType s:ExampleSensorType1 ;
+    s:hasEndEventType :EventType1 .
+
+:ExamplePlatformType1 rdfs:subClassOf : .
+
+: rdfs:subClassOf s:SensorType,
+        sosa:Platform .
+
+:EventType1 a s:EventType ;
+    rdfs:label "EventType1" .
 

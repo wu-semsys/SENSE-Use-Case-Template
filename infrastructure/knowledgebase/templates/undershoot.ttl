@@ -1,0 +1,47 @@
+@prefix : <http://example.org/seehub#> .
+@prefix s: <http://w3id.org/explainability/sense#> .
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <https://www.w3.org/ns/ssn/> .
+
+:{{ monitored_platform }}_{{ event_type }}_Shape a sh:NodeShape ;
+    sh:targetClass :{{ monitored_platform }} ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, s:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a s:EventDetection ;
+                    s:detectsEventType :{{ event_type }} ;
+                    s:hasSTLFormula "signal < {{ "threshold" if p.threshold.type == "SensorValue" else p.threshold.value }}" .
+                ?newRule s:hasVariable [
+                    s:hasName "signal" ;
+                    s:bindsTo ?signal_sensor
+                ] .
+                {% if p.threshold.type == "SensorValue" %}
+                ?newRule s:hasVariable [
+                    s:hasName "threshold" ;
+                    s:bindsTo ?threshold_sensor
+                ] .
+                {% endif %}
+                ?signal_sensor ssn:implements ?newRule .
+			}
+			WHERE {
+                $this sosa:hosts ?signal_sensor .
+                ?signal_sensor s:hasSensorType :{{ monitored_signal }} .
+                {% if p.threshold.type == "SensorValue" %}
+                {
+                    $this sosa:hosts ?threshold_sensor .
+                }
+                UNION
+                {
+                    ?parent sosa:hosts+ $this .
+                    ?parent sosa:hosts ?threshold_sensor .
+                }
+                ?threshold_sensor s:hasSensorType :{{ p.threshold.value }} .
+                {% endif %}
+                
+				BIND(IRI(CONCAT(str($this), "_{{ event_type }}")) AS ?newRule)
+			}
+        """ ;
+    ] .
