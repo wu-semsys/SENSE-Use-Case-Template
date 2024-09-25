@@ -1,4 +1,6 @@
 import argparse
+import json
+import logging
 from typing import TextIO
 import pandas as pd
 import csv
@@ -6,6 +8,7 @@ import os
 from rdflib import Graph, Literal, Namespace
 from rdflib.namespace import RDF, RDFS, SOSA
 from pyshacl import validate
+from jinja2 import Environment, FileSystemLoader
 
 '''
 # RML mapping of System Data Input to the SENSE Ontology
@@ -14,7 +17,7 @@ The input for the workflow is an Excelfile containing the following sheets with 
 - SensorTypes (SensorType, subClassOf_SensorType)
 - Platforms (Platform, PlatformType, hostedBy_Platform)
 - Sensors (Sensor, SensorType, hostedBy_Platform, observes_ObservableProperty)
-- StateTypes (StateType, SensorType_possible)
+- StateTypes (StateType, SensorType_associated)
 - StateTypeCausality (StateType_cause, causalityType, temporalRelation, PlatformRequirements, StateType_effect)
 '''
 
@@ -90,13 +93,13 @@ input_file = csv.DictReader(open(dataSource+"/1_StateTypes.csv"))
 for row in input_file:
     row = dict(row)    
     # check if Sensor Type is defined
-    if not (NS[row["SensorType_possible"]], None, None) in g:
-        print("The Sensor Type", row["SensorType_possible"], "has not been defined as a Sensor Type yet!" )  
+    if not (NS[row["SensorType_associated"]], None, None) in g:
+        print("The Sensor Type", row["SensorType_associated"], "has not been defined as a Sensor Type yet!" )
     
     id = row["StateType"].replace(" ", "")
     g.add((NS[id], RDF.type, SENSE.StateType))
     g.add((NS[id], RDFS.label, Literal(row["StateType"])))
-    g.add((NS[id], SENSE.associatedSensorType, SENSE[row["SensorType_possible"]]))
+    g.add((NS[id], SENSE.associatedSensorType, SENSE[row["SensorType_associated"]]))
 
 # convert Platforms to RDF
 input_file = csv.DictReader(open(dataSource+"/Platforms.csv"))
@@ -137,6 +140,9 @@ input_file = csv.DictReader(open(dataSource+"/2_EventStateMapping.csv"))
 
 for row in input_file:
     row = dict(row)
+
+    if row["StateType_starts"] == "":
+        continue # ignore rows in the data that do not specify event to state mappings, specifically row number 2 in 2_EventStateMapping, which is used as a second header row for formatting reasons in Excel
     
     # define Event Type
     g.add((NS[row["EventType"]], RDF.type, SENSE.EventType))
@@ -180,21 +186,103 @@ for row in input_file:
 
     id +=1
 
-if args.shacl_path is not None:
-    reasoning_rules = Graph().parse(args.shacl_path, format="turtle")
 
-    validate(
-        g,
-        shacl_graph=reasoning_rules,
-        inference="none",
-        abort_on_first=False,
-        allow_infos=False,
-        allow_warnings=False,
-        meta_shacl=False,
-        advanced=True,  # needed to execute SHACL rules
-        js=False,
-        debug=False,
-        inplace=g,  # Add derived event specifications to the system model
-    )
+with open('reasoning-templates.json') as fd:
+    templates = json.load(fd)
+
+def read_parameters(template_info, row):
+    """
+    Reads the parameters for a signal property
+    """
+    FIRST_PARAMETER_COLUMN = 6
+    i = FIRST_PARAMETER_COLUMN
+
+    result = dict()
+    for p in template_info["parameters"]:
+        result[p["name"]] = None
+        if "default" in p:
+            result[p["name"]] = {
+                "type": "LiteralValue",
+                "value": p["default"]
+            }
+
+
+    while True:
+        name = row[i]
+        type = row[i + 1]
+        value = row[i + 2]
+
+        if name is None or name == "":
+            break
+
+        result[name] = {
+            "type": type,
+            "value": value
+        }
+
+        i += 3
+
+    for p in template_info["parameters"]:
+        if p["required"] == True and result[p["name"]] is None:
+            parameter_name = p["name"]
+            print(f"Error: Parameter {parameter_name} not defined!")
+
+    return result
+
+templateLoader = FileSystemLoader(searchpath="./templates/")
+templateEnv = Environment(loader=templateLoader)
+reasoning_rules = Graph()
+input_file = csv.reader(open(dataSource+"/2_EventStateMapping.csv"))
+next(input_file)
+for row in input_file:
+    event_type = row[0]
+    monitored_platform = row[3]
+    monitored_signal = row[4]
+    signal_property = row[5]
+
+    if signal_property == "":
+        continue # ignore rows in the data that do not specify events, specifically row number 2 in 2_EventStateMapping, which is used as a second header row for formatting reasons in Excel
+
+    if signal_property not in templates:
+        logging.error(f"{event_type}: Signal property {signal_property} not yet supported!")
+        continue
+
+    template_info = templates[signal_property]
+
+    parameters = read_parameters(template_info, row)
+
+    render_input = {
+        "event_type": event_type,
+        "monitored_platform": monitored_platform,
+        "monitored_signal": monitored_signal,
+        "signal_property": signal_property,
+        "p": parameters,
+    }
+
+    template = templateEnv.get_template(template_info["template"])
+    render_result = template.render(render_input)
+
+    with open(f"./SystemData/.debug/{monitored_platform}_{event_type}.ttl", "w") as df:
+        df.write(render_result)
+
+    reasoning_rules.parse(data=render_result, format="turtle")
+
+
+if args.shacl_path is not None:
+    reasoning_rules.parse(args.shacl_path, format="turtle")
+    
+validate(
+    g,
+    shacl_graph=reasoning_rules,
+    inference="none",
+    abort_on_first=False,
+    allow_infos=False,
+    allow_warnings=False,
+    meta_shacl=False,
+    advanced=True,  # needed to execute SHACL rules
+    js=False,
+    debug=False,
+    inplace=g,  # Add derived event specifications to the system model
+)
 
 g.serialize(destination = f"{ttl_path}", format='ttl')
