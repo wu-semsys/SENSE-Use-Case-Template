@@ -5,7 +5,7 @@
 @prefix owlim: <http://www.ontotext.com/trree/owlim#>.
 
 [] a rep:Repository ;
-    rep:repositoryID "USE_CASE_NAME" ;
+    rep:repositoryID "use_case_name" ;
     rdfs:label "This is the repository for USE_CASE_NAME." ;
     rep:repositoryImpl [
         rep:repositoryType "graphdb:SailRepository" ;
