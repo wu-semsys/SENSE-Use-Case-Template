@@ -19,6 +19,7 @@ The input for the workflow is an Excelfile containing the following sheets with 
 - Sensors (Sensor, SensorType, hostedBy_Platform, observes_ObservableProperty)
 - StateTypes (StateType, SensorType_associated)
 - StateTypeCausality (StateType_cause, causalityType, temporalRelation, PlatformRequirements, StateType_effect)
+- EventStateMapping (EventType, StateType_starts, StateType_ends, MonitoredPlatform, MonitoredSignal, SignalProperty, <SignalPropertyDefinitions using triples of Name, Type, LiteralOrSensor>)
 '''
 
 arg_parser = argparse.ArgumentParser(prog="XLSXtoTTL.py")
@@ -141,7 +142,7 @@ input_file = csv.DictReader(open(dataSource+"/2_EventStateMapping.csv"))
 for row in input_file:
     row = dict(row)
 
-    if row["StateType_starts"] == "":
+    if row["StateType_starts"] == "" and row["StateType_ends"] == "":
         continue # ignore rows in the data that do not specify event to state mappings, specifically row number 2 in 2_EventStateMapping, which is used as a second header row for formatting reasons in Excel
     
     # define Event Type
