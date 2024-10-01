@@ -45,12 +45,7 @@ This will result in a repository with the following file structure:
 ├── README.md (# this README file)
 ├── compose.yml # (docker compose file)
 ├── config # (configuration files for all modules)
-│   ├── data_ingestion.docker.json
-│   ├── event_to_state_causality.docker.json
-│   ├── explanation_engine.docker.json
-│   ├── knowledgebase.docker.json
-│   ├── semantic_event_log_bridge.docker.json
-│   └── simple_event_detection.docker.json
+│   ├── config.docker.json
 ├── infrastructure # (additional module-specific configuration and data files)
 │   └── knowledgebase
 │       ├── SystemData.xlsx
@@ -67,12 +62,7 @@ This will result in a repository with the following file structure:
 The USE_CASE_NAME placeholder is currently quite havily used. We are working on reducing the number of occurances. We suggest search-and-replace for replacing the USE_CASE_NAME with an expressive name for your use case. For now, it is present in the following files:
 
 ```bash
-./config/data_ingestion.docker.json
-./config/event_to_state_causality.docker.json
-./config/simple_event_detection.docker.json
-./config/explanation_engine.docker.json
-./config/semantic_event_log_bridge.docker.json
-./config/knowledgebase.docker.json
+./config/config.docker.json
 ./infrastructure/knowledgebase/graphdb_repo_config.ttl
 ./infrastructure/knowledgebase/reasoning/event-reasoning.ttl
 ```
