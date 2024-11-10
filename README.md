@@ -84,7 +84,7 @@ pip install -r requirements.txt
 python3 XLSXtoTTL.py "http://example.org/USE_CASE_NAME#" \
     ../infrastructure/knowledgebase/SystemData.xlsx \
     ../infrastructure/knowledgebase/data/system-data.ttl \
-    --shacl-path "./sense-validation v1.0.shacl"
+    --shacl-path "../infrastructure/knowledgebase/sense-validation v1.0.shacl"
 ```
 
 ### 4. Set up a Connection to an Existing InfluxDB Instance
