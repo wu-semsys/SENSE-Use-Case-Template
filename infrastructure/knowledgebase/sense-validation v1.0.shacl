@@ -1,0 +1,98 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix sense: <http://w3id.org/explainability/sense#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Define the shape for the Sensor class
+sense:SensorShape
+    a sh:NodeShape ;                            
+    sh:targetClass sosa:Sensor ;
+	sh:property [
+		sh:path sosa:observes ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+		sh:class sosa:ObservableProperty ;
+		sh:message "Each Sensor must observes one ObservableProperty."
+	] ;
+    sh:property [
+        sh:path sosa:isHostedBy ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class sense:PlatformOfInterest ;
+        sh:message "Each Sensor must be hosted by a platform." ;
+    ] ;
+.
+
+# Define the shape for the Platform class
+sense:PlatformShape
+    a sh:NodeShape ;
+    sh:targetClass sosa:Platform ;
+    sh:property [
+        sh:path sosa:hosts ;
+        sh:class sense:Sensor ;
+    ] ;
+    sh:property [
+        sh:path sense:hasPlatformType ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class sense:PlatformType ;
+        sh:message "Each Platform must have a Platform type." ;
+    ] ;
+.
+
+# Define the shape for the StateType class
+sense:StateTypeShape
+    a sh:NodeShape ;
+    sh:targetClass sense:StateType ;
+    sh:property [
+        sh:path sense:hasStartEventType ;
+        sh:minCount 1 ;
+        sh:class sense:EventType ;
+        sh:message "A State Type must have a start Event Type." ;
+    ] ;
+    sh:property [
+        sh:path sense:hasEndEventType ;
+        sh:minCount 1 ;
+        sh:class sense:EventType ;
+        sh:message "A State Type must have an end Event Type." ;
+    ] ;
+.
+
+# Define the shape for the EventType class	
+sense:EventTypeShape
+    a sh:NodeShape ;
+    sh:targetClass sense:EventType ;
+    sh:or (
+        [
+            sh:property [
+                sh:path sense:startsStateType ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:class sense:StateType ;
+                sh:message "An Event Type must be either a start or an end to a StateType." ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path sense:endsStateType ;
+                sh:minCount 1 ;
+                sh:maxCount 1 ;
+                sh:class sense:StateType ;
+                sh:message "An Event Type must be either a start or an end to a StateType." ;
+            ]
+        ]
+    ) ;
+.
+
+# Define the shape for the PlatformOfInterest class
+sense:PlatformOfInterestShape
+    a sh:NodeShape ;
+    sh:targetClass sense:PlatformOfInterest ;
+    sh:property [
+        sh:path sense:hasPlatformType ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:node sense:PlatformType ;
+        sh:message "A Platform of Interest must have a Platform Type that is a subclass of Platform Type."
+    ] ;
+.

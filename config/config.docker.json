@@ -11,6 +11,7 @@
 		"host": "knowledgebase",
 		"port": 7200,
 		"repository": "use_case_name",
+        "base-uri": "http://example.org/use_case_name#",
 		"named-graph": "http://w3id.org/explainability/graph/use_case_name_dynamic"
 	},
 	"influxdb": {
@@ -54,7 +55,139 @@
 			"reupload": false
 		}
 	],
-	"explanation-engine": {
-		"port": 5001
+	"explanation-interface": {
+        "port": 5001,
+        "(Optional) chatbot-integration": {
+            "url": "http://explanation-interface:5001/v1/api/integration",
+            "named-graph": "http://w3id.org/explainability/graph/use_case_name_chatbot",
+			"queries": [
+				{
+					"name": "SENSOR",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "SENSOR_TYPE",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "STATE_TYPE",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "TEMPORAL_RELATION",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "TOPOLOGICAL_RELATION",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "CAUSAL_RELATION",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "EVENT_TYPE",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "OBSERVABLE_PROPERTY",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "PROCEDURE",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "RESULT",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "STATE_TYPE_CAUSALITY",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "EVENT",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "STATE",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				},
+				{
+					"name": "OBSERVATION",
+					"new-prefixes": [
+						"PREFIX test: <url>"
+					],
+					"new-statements": [
+						"?s test:relation ?new"
+					]
+				}
+			]
+		}
 	}	
 }

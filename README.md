@@ -59,7 +59,8 @@ This will result in a repository with the following file structure:
     └── XLSXtoTTL.py # script for converting SystemData.xlsx to system-data.ttl
 ```
 
-The USE_CASE_NAME placeholder is currently quite havily used. We are working on reducing the number of occurances. We suggest search-and-replace for replacing the USE_CASE_NAME with an expressive name for your use case. For now, it is present in the following files:
+Note: The USE_CASE_NAME placeholder is currently quite havily used. We are working on reducing the number of occurances. We suggest search-and-replace for replacing the USE_CASE_NAME with an expressive name for your use case. For now, it is present in the following files:
+Note: In config.json, keys labeled with (Optional) can be fully removed and should only be included if needed. (If you choose to use them, be sure to remove the (Optional) text from their names)
 
 ```bash
 ./config/config.docker.json
@@ -83,7 +84,7 @@ pip install -r requirements.txt
 python3 XLSXtoTTL.py "http://example.org/USE_CASE_NAME#" \
     ../infrastructure/knowledgebase/SystemData.xlsx \
     ../infrastructure/knowledgebase/data/system-data.ttl \
-    --shacl-path ../infrastructure/knowledgebase/reasoning/event-reasoning.ttl
+    --shacl-path "./sense-validation v1.0.shacl"
 ```
 
 ### 4. Set up a Connection to an Existing InfluxDB Instance
@@ -120,4 +121,4 @@ docker compose up
 
 Refer to [https://git.ai.wu.ac.at/sense/sense-core/-/blob/main/sense_core/simple_event_detection/README.md](https://git.ai.wu.ac.at/sense/sense-core/-/blob/main/sense_core/simple_event_detection/README.md) for instructions on how to retrieve a list of **events** from your SENSE system instantiation.
 
-Refer to [https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-engine/README.md](https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-engine/README.md) for instructions on how to retrieve **explanations** for events from your SENSE system instantiation. 
+Refer to [https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-interface/README.md](https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-interface/README.md) for instructions on how to retrieve **explanations** for events from your SENSE system instantiation. 
