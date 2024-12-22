@@ -122,3 +122,37 @@ docker compose up
 Refer to [https://git.ai.wu.ac.at/sense/sense-core/-/blob/main/sense_core/simple_event_detection/README.md](https://git.ai.wu.ac.at/sense/sense-core/-/blob/main/sense_core/simple_event_detection/README.md) for instructions on how to retrieve a list of **events** from your SENSE system instantiation.
 
 Refer to [https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-interface/README.md](https://git.ai.wu.ac.at/sense/sense-core/-/tree/main/sense_core/explanation-interface/README.md) for instructions on how to retrieve **explanations** for events from your SENSE system instantiation. 
+
+### 8. Stay Up to Date With the Template Repository
+While working on your use case, the SENSE team might push changes to the template repository, such as support for additional event and explanation types. To stay updated, you can either use the builtin options of GitLab or the Git Command Line Interface (CLI).
+
+#### Sync via the GitLab User Interface
+GitLab will keep you informed about changes in the template repository.
+![alt](./doc/sync-up-to-date.png)
+
+#### Sync via the CLI
+You can also use the CLI to stay in sync with the template repository (possibly on a more granular level). First, add the template repository to your use case repository as a secondary remote called ```upstream```.
+
+```bash
+git remote add upstream git@git.ai.wu.ac.at:sense/use-case-template.git
+```
+
+Next, checkout the main branch of your use case repository and then pull the main branch of the upstream (template) repository. 
+```bash
+git checkout main
+git fetch upstream
+git pull upstream main
+```
+
+In case you did not create your use case repository by forking the template, the above commands may fail with ```fatal: refusing to merge unrelated histories```. In this case use:
+
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main --allow-unrelated-histories
+git pull upstream main
+```
+
+Note that this might result in a significant number of merge conflicts that need to be addressed.
+
+Finally, commit and push the changes to the main branch of your use case repository.
