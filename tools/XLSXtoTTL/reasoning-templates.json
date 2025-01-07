@@ -1,0 +1,124 @@
+{
+    "Overshoot": {
+        "parameters": [
+            {
+                "name": "threshold",
+                "required": true
+            },
+            {
+                "name": "overshoot_margin",
+                "required": false,
+                "implemented": false
+            },
+            {
+                "name": "overshoot_interval",
+                "required": false,
+                "allow_sensor_binding": false,
+                "default": 0
+            }
+        ],
+        "template": "overshoot.ttl"
+    },
+    "Undershoot": {
+        "parameters": [
+            {
+                "name": "threshold",
+                "required": true
+            },
+            {
+                "name": "undershoot_margin",
+                "required": false,
+                "implemented": false
+            },
+            {
+                "name": "undershoot_interval",
+                "required": false,
+                "allow_sensor_binding": false,
+                "default": 0
+            }
+        ],
+        "template": "undershoot.ttl"
+    },
+    "WithinBounds": {
+        "parameters": [
+            {
+                "name": "upper_threshold",
+                "required": true
+            },
+            {
+                "name": "upper_threshold_margin",
+                "required": false,
+                "implemented": false,
+                "allow_sensor_binding": false
+            },
+            {
+                "name": "upper_threshold_interval",
+                "required": false,
+                "implemented": false,
+                "allow_sensor_binding": false
+            },
+            {
+                "name": "lower_threshold",
+                "required": true
+            },
+            {
+                "name": "lower_threshold_margin",
+                "required": false,
+                "allow_sensor_binding": false,
+                "implemented": false
+            },
+            {
+                "name": "lower_threshold_interval",
+                "required": false,
+                "allow_sensor_binding": false,
+                "implemented": false
+            }
+        ],
+        "template": "within-bounds.ttl"
+    },
+    "FallTime": {
+        "parameters": [
+            {
+                "name": "delta",
+                "required": true,
+                "allow_sensor_binding": false
+            },
+            {
+                "name": "fall_time",
+                "required": true,
+                "allow_sensor_binding": false
+            }
+        ],
+        "template": "fall-time.ttl"
+    },
+    "RiseTime": {
+        "parameters": [
+            {
+                "name": "delta",
+                "required": true,
+                "allow_sensor_binding": false
+            },
+            {
+                "name": "rise_time",
+                "required": true,
+                "allow_sensor_binding": false
+            }
+        ],
+        "template": "rise-time.ttl"
+    },
+    "StableTime": {
+        "parameters": [
+            {
+                "name": "maximum_delta",
+                "required": true,
+                "allow_sensor_binding": false
+            },
+            {
+                "name": "stable_time",
+                "required": true,
+                "allow_sensor_binding": false
+            }
+        ],
+        "template": "stable-time.ttl"
+    }
+}

@@ -1,0 +1,44 @@
+@prefix : <{{ namespace }}> .
+@prefix sense: <http://w3id.org/explainability/sense#> .
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <httpsense://www.w3.org/ns/ssn/> .
+
+:{{ monitored_platform }}_{{ event_type }}_Shape a sh:NodeShape ;
+    sh:targetClass sense:PlatformOfInterest ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, sense:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a sense:EventDetection ;
+                    sense:method "CustomMonitor" ;
+                    sense:definition "RiseTimeMonitor" .
+                ?newRule sense:hasParameterBinding [
+                    a sense:ParameterBinding ;
+                    sense:parameterName "signal" ;
+                    sense:bindsToSensor ?signal_sensor
+                ] .
+                ?newRule sense:hasParameterBinding [
+                    a sense:ParameterBinding ;
+                    sense:parameterName "delta" ;
+                    sense:bindsToLiteral {{ p.delta.value }}
+                ] .
+                ?newRule sense:hasParameterBinding [
+                    a sense:ParameterBinding ;
+                    sense:parameterName "rise_time" ;
+                    sense:bindsToLiteral {{ p.rise_time.value }}
+                ] .
+
+                ?signal_sensor ssn:implements ?newRule .
+                :{{ event_type }} sense:detectedBy ?newRule .
+			}
+			WHERE {
+                $this sense:hasPlatformType :{{ monitored_platform }} .
+                $this sosa:hosts ?signal_sensor .
+                ?signal_sensor sosa:observes :{{ monitored_observable_property }} .
+
+				BIND(IRI(CONCAT(str($this), "_{{ event_type }}")) AS ?newRule)
+			}
+        """ ;
+    ] .

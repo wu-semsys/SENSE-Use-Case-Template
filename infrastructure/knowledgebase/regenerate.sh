@@ -1,0 +1,1 @@
+python3 ../../tools/XLSXtoTTL/XLSXtoTTL.py "http://example.org/use_case_name#" SystemData.xlsx ./data/system-data.ttl --validate True --shacl-path ./shacl/additional-validation-rules.ttl --shacl-reasoning-path ./shacl/additional-event-reasoning.ttl

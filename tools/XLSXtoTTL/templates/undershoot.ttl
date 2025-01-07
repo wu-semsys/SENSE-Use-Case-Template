@@ -1,0 +1,72 @@
+@prefix : <{{ namespace }}> .
+@prefix sense: <http://w3id.org/explainability/sense#> .
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <httpsense://www.w3.org/ns/ssn/> .
+
+:{{ monitored_platform }}_{{ event_type }}_Shape a sh:NodeShape ;
+    sh:targetClass sense:PlatformOfInterest ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:prefixes :, sense:, sosa:, ssn:;
+        sh:construct """
+			CONSTRUCT {
+				?newRule a sense:EventDetection ;
+                    sense:method "STL" ;
+                    sense:definition "always[0:{{p.undershoot_interval.value}}](signal < {{ "threshold" if p.threshold.type == "SensorValue" else p.threshold.value }})" .
+                ?newRule sense:hasParameterBinding [
+                    a sense:ParameterBinding ;
+                    sense:parameterName "signal" ;
+                    sense:bindsToSensor ?signal_sensor
+                ] .
+                {% if p.threshold.type == "SensorValue" %}
+                ?newRule sense:hasParameterBinding [
+                    a sense:ParameterBinding ;
+                    sense:parameterName "threshold" ;
+                    sense:bindsToSensor ?threshold_sensor
+                ] .
+                {% endif %}
+                {% if p.undershoot_margin.type == "SensorValue" %}
+                ?newRule sense:hasParameterBinding [
+                    a sense:ParameterBinding ;
+                    sense:parameterName "undershoot_margin" ;
+                    sense:bindsToSensor ?undershoot_margin_sensor
+                ] .
+                {% endif %}
+
+                ?signal_sensor ssn:implements ?newRule .
+                :{{ event_type }} sense:detectedBy ?newRule .
+			}
+			WHERE {
+                $this sense:hasPlatformType :{{ monitored_platform }} .
+                $this sosa:hosts ?signal_sensor .
+                ?signal_sensor sosa:observes :{{ monitored_observable_property }} .
+
+                {% if p.threshold.type == "SensorValue" %}
+                {
+                    $this sosa:hosts ?threshold_sensor .
+                }
+                UNION
+                {
+                    ?parent sosa:hosts+ $this .
+                    ?parent sosa:hosts ?threshold_sensor .
+                }
+                ?threshold_sensor sosa:observes :{{ p.threshold.value }} .
+                {% endif %}
+
+                {% if p.undershoot_margin.type == "SensorValue" %}
+                {
+                    $this sosa:hosts ?undershoot_margin_sensor .
+                }
+                UNION
+                {
+                    ?parent sosa:hosts+ $this .
+                    ?parent sosa:hosts ?undershoot_margin_sensor .
+                }
+                ?undershoot_margin_sensor sosa:observes :{{ p.undershoot_margin.value }} .
+                {% endif %}
+                
+				BIND(IRI(CONCAT(str($this), "_{{ event_type }}")) AS ?newRule)
+			}
+        """ ;
+    ] .

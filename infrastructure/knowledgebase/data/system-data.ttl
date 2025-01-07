@@ -1,28 +1,108 @@
-@prefix : <http://example.org/exampleusecase#> .
+@prefix : <http://example.org/use_case_name#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix s: <http://w3id.org/explainability/sense#> .
+@prefix sense: <http://w3id.org/explainability/sense#> .
 @prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-:ExamplePlatform1 a :ExamplePlatformType1 ;
-    rdfs:label "ExamplePlatform1" .
+:StateTypeCausality1 a sense:StateTypeCausality ;
+    rdfs:label "LightSource_HighEnergy causes LightSource_Hot" ;
+    sense:causalRelation "causes" ;
+    sense:cause :LightSource_HighEnergy ;
+    sense:effect :LightSource_Hot ;
+    sense:temporalRelation "overlaps" ;
+    sense:topologicalRelation "samePlatform" .
 
-:ExampleSensorType1 rdfs:subClassOf : .
+:Energy a sosa:ObservableProperty .
 
-:ExampleStateType1 a s:StateType ;
-    rdfs:label "ExampleStateType1" ;
-    s:associatedSensorType s:ExampleSensorType1 ;
-    s:hasStartEventType :EventType1 .
+:HighEnergy_End a sense:EventType ;
+    rdfs:label "HighEnergy_End" ;
+    sense:detectedBy :LightSource1_HighEnergy_End ;
+    sense:endsStateType :LightSource_HighEnergy .
 
-:ExampleStateType2 a s:StateType ;
-    rdfs:label "ExampleStateType2" ;
-    s:associatedSensorType s:ExampleSensorType1 ;
-    s:hasEndEventType :EventType1 .
+:HighEnergy_Start a sense:EventType ;
+    rdfs:label "HighEnergy_Start" ;
+    sense:detectedBy :LightSource1_HighEnergy_Start ;
+    sense:startsStateType :LightSource_HighEnergy .
 
-:ExamplePlatformType1 rdfs:subClassOf : .
+:Hot_End a sense:EventType ;
+    rdfs:label "Hot_End" ;
+    sense:detectedBy :LightSource1_Hot_End ;
+    sense:endsStateType :LightSource_Hot .
 
-: rdfs:subClassOf s:SensorType,
-        sosa:Platform .
+:Hot_Start a sense:EventType ;
+    rdfs:label "Hot_Start" ;
+    sense:detectedBy :LightSource1_Hot_Start ;
+    sense:startsStateType :LightSource_Hot .
 
-:EventType1 a s:EventType ;
-    rdfs:label "EventType1" .
+:LightSource rdfs:subClassOf :,
+        sense:PlatformType .
+
+:Temperature a sosa:ObservableProperty .
+
+:LightSource1 a sense:PlatformOfInterest ;
+    rdfs:label "LightSource1" ;
+    sense:hasPlatformType :LightSource ;
+    sosa:hosts :Energy_LightSource1,
+        :Temp_LightSource1 .
+
+:LightSource1_HighEnergy_End a sense:EventDetection ;
+    sense:definition "always[0:0](signal < 0)" ;
+    sense:hasParameterBinding [ a sense:ParameterBinding ;
+            sense:bindsToSensor :Energy_LightSource1 ;
+            sense:parameterName "signal" ] ;
+    sense:method "STL" .
+
+:LightSource1_HighEnergy_Start a sense:EventDetection ;
+    sense:definition "always[0:0](signal > 0)" ;
+    sense:hasParameterBinding [ a sense:ParameterBinding ;
+            sense:bindsToSensor :Energy_LightSource1 ;
+            sense:parameterName "signal" ] ;
+    sense:method "STL" .
+
+:LightSource1_Hot_End a sense:EventDetection ;
+    sense:definition "always[0:0](signal < 0)" ;
+    sense:hasParameterBinding [ a sense:ParameterBinding ;
+            sense:bindsToSensor :Temp_LightSource1 ;
+            sense:parameterName "signal" ] ;
+    sense:method "STL" .
+
+:LightSource1_Hot_Start a sense:EventDetection ;
+    sense:definition "always[0:0](signal > 0)" ;
+    sense:hasParameterBinding [ a sense:ParameterBinding ;
+            sense:bindsToSensor :Temp_LightSource1 ;
+            sense:parameterName "signal" ] ;
+    sense:method "STL" .
+
+:Energy_LightSource1 a sosa:Sensor ;
+    rdfs:label "Energy_LightSource1" ;
+    sense:dataSource "Not part of the template (see demo instantiation)" ;
+    sosa:isHostedBy :LightSource1 ;
+    sosa:observes :Energy ;
+    ssn:implements :LightSource1_HighEnergy_End,
+        :LightSource1_HighEnergy_Start .
+
+:LightSource_HighEnergy a sense:StateType ;
+    rdfs:label "LightSource_HighEnergy" ;
+    sense:associatedObservableProperty sense:Energy ;
+    sense:associatedPlatformType sense:LightSource ;
+    sense:hasEndEventType :HighEnergy_End ;
+    sense:hasStartEventType :HighEnergy_Start ;
+    sense:isTriggerState true .
+
+:LightSource_Hot a sense:StateType ;
+    rdfs:label "LightSource_Hot" ;
+    sense:associatedObservableProperty sense:Temperature ;
+    sense:associatedPlatformType sense:LightSource ;
+    sense:hasEndEventType :Hot_End ;
+    sense:hasStartEventType :Hot_Start ;
+    sense:isTriggerState true .
+
+:Temp_LightSource1 a sosa:Sensor ;
+    rdfs:label "Temp_LightSource1" ;
+    sense:dataSource "Not part of the template (see demo instantiation)" ;
+    sosa:isHostedBy :LightSource1 ;
+    sosa:observes :Temperature ;
+    ssn:implements :LightSource1_Hot_End,
+        :LightSource1_Hot_Start .
 

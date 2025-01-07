@@ -1,1 +1,2 @@
-SystemData
+SystemData/*
+!SystemData/.gitkeep

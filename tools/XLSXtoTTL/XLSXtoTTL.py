@@ -1,4 +1,5 @@
 import argparse
+from ast import literal_eval
 import json
 import logging
 from typing import TextIO
@@ -28,14 +29,21 @@ arg_parser = argparse.ArgumentParser(prog="XLSXtoTTL.py")
 arg_parser.add_argument("namespace")
 arg_parser.add_argument("input")
 arg_parser.add_argument("output")
-arg_parser.add_argument("--shacl-path", required=True, help="Path to the SHACL shapes file")
+arg_parser.add_argument("--validate", help="Indicates whether the resulting RDF graph will be validated", type=literal_eval, choices=[True, False], default=True)
+arg_parser.add_argument("--shacl-path", help="Path to the SHACL shapes file for additional validation rules")
+arg_parser.add_argument("--shacl-reasoning-path", help="Path to the SHACL shapes file for additional reasoning rules")
 args = arg_parser.parse_args()
+
+script_path = os.path.realpath(__file__)
+script_dir = os.path.dirname(script_path)
 
 # Define Data Source
 namespace = args.namespace
 excel_path = args.input
 ttl_path = args.output
+shacl_validate = args.validate
 shacl_path = args.shacl_path
+shacl_reasoning_path = args.shacl_reasoning_path
  
 def excel_to_csv(source) -> dict[str, TextIO]:
     # Suppress specific warnings related to data validation
@@ -220,7 +228,7 @@ for row in input_file:
     id +=1
 
 
-with open('reasoning-templates.json') as fd:
+with open(os.path.join(script_dir, 'reasoning-templates.json')) as fd:
     templates = json.load(fd)
 
 def read_parameters(template_info, row):
@@ -273,7 +281,7 @@ def read_parameters(template_info, row):
 
     return result
 
-templateLoader = FileSystemLoader(searchpath="./templates/")
+templateLoader = FileSystemLoader(searchpath=os.path.join(script_dir, "./templates/"))
 templateEnv = Environment(loader=templateLoader)
 reasoning_rules = Graph()
 input_file = csv.reader(open(dataSource+"/2_EventStateMapping.csv"))
@@ -314,6 +322,24 @@ for row in input_file:
 
     reasoning_rules.parse(data=render_result, format="turtle")
 
+# Create event Detection Rules by running the SHACL (rules) reasoner
+
+if shacl_reasoning_path is not None:
+    reasoning_rules.parse(shacl_reasoning_path, format="turtle")
+
+validate(
+    g,
+    shacl_graph=reasoning_rules,
+    inference="none",
+    abort_on_first=False,
+    allow_infos=False,
+    allow_warnings=False,
+    meta_shacl=False,
+    advanced=True,  # needed to execute SHACL rules
+    js=False,
+    debug=False,
+    inplace=g,  # Add derived event specifications to the system model
+)
 
 def validate_ontology(ontology_graph: Graph, shacl_graph: Graph):
     """
@@ -347,16 +373,21 @@ def validate_ontology(ontology_graph: Graph, shacl_graph: Graph):
 
     return conforms, results_graph, results_text
 
-# Load SHACL shapes
-shacl_graph = Graph()
-shacl_graph.parse(shacl_path, format="turtle")
+if shacl_validate:
+    # Load SHACL shapes
+    shacl_graph = Graph()
+    shacl_graph.parse(os.path.join(script_dir, "sense-validation v1.0.shacl"), format="turtle")
+    if shacl_path is not None:
+        shacl_graph.parse(shacl_path, format="turtle")
 
-# Perform SHACL validation
-conforms, results_graph, results_text = validate_ontology(g, shacl_graph)
+    # Perform SHACL validation
+    conforms, results_graph, results_text = validate_ontology(g, shacl_graph)
 
-if conforms:
-    g.serialize(destination=ttl_path, format='turtle')
-    print(f"Ontology serialized to {ttl_path}")
+    if conforms:
+        g.serialize(destination=ttl_path, format='turtle')
+        print(f"Ontology serialized to {ttl_path}")
+    else:
+        print("The ontology does NOT conform to the SHACL shapes. The TTL file was not generated.")
+        exit(1)
 else:
-    print("The ontology does NOT conform to the SHACL shapes. The TTL file was not generated.")
-    exit(1)
+    g.serialize(destination = f"{ttl_path}", format='ttl')
