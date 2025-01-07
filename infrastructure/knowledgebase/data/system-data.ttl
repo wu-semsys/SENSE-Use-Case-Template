@@ -47,28 +47,28 @@
         :Temp_LightSource1 .
 
 :LightSource1_HighEnergy_End a sense:EventDetection ;
-    sense:definition "always[0:0](signal < 0)" ;
+    sense:definition "always[0:0](signal < 5)" ;
     sense:hasParameterBinding [ a sense:ParameterBinding ;
             sense:bindsToSensor :Energy_LightSource1 ;
             sense:parameterName "signal" ] ;
     sense:method "STL" .
 
 :LightSource1_HighEnergy_Start a sense:EventDetection ;
-    sense:definition "always[0:0](signal > 0)" ;
+    sense:definition "always[0:0](signal > 5)" ;
     sense:hasParameterBinding [ a sense:ParameterBinding ;
             sense:bindsToSensor :Energy_LightSource1 ;
             sense:parameterName "signal" ] ;
     sense:method "STL" .
 
 :LightSource1_Hot_End a sense:EventDetection ;
-    sense:definition "always[0:0](signal < 0)" ;
+    sense:definition "always[0:0](signal < 100)" ;
     sense:hasParameterBinding [ a sense:ParameterBinding ;
             sense:bindsToSensor :Temp_LightSource1 ;
             sense:parameterName "signal" ] ;
     sense:method "STL" .
 
 :LightSource1_Hot_Start a sense:EventDetection ;
-    sense:definition "always[0:0](signal > 0)" ;
+    sense:definition "always[0:0](signal > 100)" ;
     sense:hasParameterBinding [ a sense:ParameterBinding ;
             sense:bindsToSensor :Temp_LightSource1 ;
             sense:parameterName "signal" ] ;
