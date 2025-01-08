@@ -11,6 +11,7 @@ We provide this Use Case Template repository as a starting point for creating a 
 - [5. Optional: Build the Docker Images](#5-optional-build-the-docker-images)
 - [6. Run the Application](#6-run-the-application)
 - [7. Request Events and Explanations](#7-request-events-and-explanations)
+- [8. Stay Up to Date With the Template Repository](#8-stay-up-to-date-with-the-template-repository)
 
 ## SENSE Use Case Instantiation Instructions
 There are several steps listed below that will create a new use-case-specific repository from this Use Case Template repository and populate the template with use-case-specific information. Note that, on several occasions, it is necessary to define a name for the use case. We use USE_CASE_NAME as a placeholder. 
