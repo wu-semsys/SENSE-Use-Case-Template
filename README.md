@@ -132,28 +132,29 @@ GitLab will keep you informed about changes in the template repository.
 ![alt](./doc/sync-up-to-date.png)
 
 #### Sync via the CLI
-You can also use the CLI to stay in sync with the template repository (possibly on a more granular level). First, add the template repository to your use case repository as a secondary remote called ```upstream```.
+You can also use the CLI to stay in sync with the template repository (possibly on a more granular level). First, create a temporary feature branch to work on the merge and immediately switch to this new branch.
+
+```bash
+git checkout -b feature/merge-template-update
+```
+
+Next, add the template repository to your use case repository as a secondary remote called ```upstream```.
 
 ```bash
 git remote add upstream git@git.ai.wu.ac.at:sense/use-case-template.git
 ```
 
-Next, checkout the main branch of your use case repository and then pull the main branch of the upstream (template) repository. 
+Next, pull the main branch of the upstream (template) repository. 
 ```bash
-git checkout main
-git fetch upstream
 git pull upstream main
 ```
 
 In case you did not create your use case repository by forking the template, the above commands may fail with ```fatal: refusing to merge unrelated histories```. In this case use:
 
 ```bash
-git checkout main
-git fetch upstream
-git merge upstream/main --allow-unrelated-histories
-git pull upstream main
+git pull upstream main --allow-unrelated-histories
 ```
 
-Note that this might result in a significant number of merge conflicts that need to be addressed.
+Note that this might result in a significant number of merge conflicts that need to be addressed. 
 
 Finally, commit and push the changes to the main branch of your use case repository.
