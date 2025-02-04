@@ -19,7 +19,7 @@ services:
   #
 
   knowledgebase:
-    image: registry.ai.wu.ac.at/sense/sense-core/knowledgebase:latest
+    image: sense-core/knowledgebase:v1.0
     container_name: knowledgebase
     privileged: true
     ports:
@@ -36,7 +36,7 @@ services:
 
   semantic-event-log-bridge:
     container_name: semantic-event-log-bridge
-    image: registry.ai.wu.ac.at/sense/sense-core/semantic-event-log-bridge:latest
+    image: sense-core/semantic-event-log-bridge:v1.0
     volumes:
       - ./config/config.docker.json:/opt/semantic-event-log_bridge/config/semantic_event_log_bridge.docker.json:ro
   
@@ -46,7 +46,7 @@ services:
 
   simple-event-detection:
     container_name: simple-event-detection
-    image: registry.ai.wu.ac.at/sense/sense-core/simple-event-detection:latest
+    image: sense-core/simple-event-detection:v1.0
     volumes:
       - ./config/config.docker.json:/opt/monitoring-service/config.json:ro
   
@@ -56,7 +56,7 @@ services:
 
   data-ingestion:
     container_name: data-ingestion
-    image: registry.ai.wu.ac.at/sense/sense-core/data-ingestion:latest
+    image: sense-core/data-ingestion:v1.0
     volumes:
       - ./config/config.docker.json:/opt/data-ingestion/config.json:ro
   
@@ -66,18 +66,18 @@ services:
   
   event-to-state-causality:
     container_name: event-to-state-causality
-    image: registry.ai.wu.ac.at/sense/sense-core/event-to-state-causality:latest
+    image: sense-core/event-to-state-causality:v1.0
     volumes: 
       - ./config/config.docker.json:/opt/event-to-state-causality/config.json:ro
       
   #
-  # Explanation Engine
+  # Explanation Interface
   #
   
-  explanation-engine:
+  explanation-interface:
     container_name: explanation-engine
-    image: registry.ai.wu.ac.at/sense/sense-core/explanation-engine:latest
+    image: sense-core/explanation-interface:v1.0
     volumes: 
-      - ./config/config.docker.json:/opt/explanation-engine/config.json:ro
+      - ./config/config.docker.json:/opt/explanation-interface/config.json:ro
     ports:
       - 5001:5001  
