@@ -20,6 +20,8 @@ There are several steps listed below that will create a new use-case-specific re
 #### Option 1: Host the Use Case on GitHub
 If your use-case-specific instance of SENSE should be hosted on GitHub, utilize the GitHub fork functionality to create a fork of this repository.
 
+![alt](./doc/create-a-fork.png)
+
 #### Option 2: Host on a Different Git Server
 If you need to host your use-case-specific instance of SENSE on a different Git server, follow the steps below:
 1. Create an empty repository on your Git server, but do not initialize it with any files
